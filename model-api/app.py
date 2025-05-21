@@ -21,8 +21,17 @@ def predict():
         return jsonify({"error": "No image uploaded"}), 400
 
     file = request.files['image']
+    name = request.form.get('name')
+    eye = request.form.get('eye')
+
     prediction = predict_image(file, model)
-    return jsonify(prediction)
+
+    return jsonify({
+        "class": prediction["class"],
+        "probabilities": prediction["probabilities"],
+        "name": name,
+        "eye": eye
+    })
 
 if __name__ == '__main__':
     app.run(debug=False, port=5001)
