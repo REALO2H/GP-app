@@ -13,7 +13,7 @@ model = load_model()
 
 @app.route('/')
 def home():
-    return "👁️ Diabetic Retinopathy API Running!"
+    return " Diabetic Retinopathy API Running!"
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -25,13 +25,41 @@ def predict():
     eye = request.form.get('eye')
 
     prediction = predict_image(file, model)
+    predicted_class = prediction["class"]
+    probabilities = prediction["probabilities"]
+    confidence = max(probabilities)
 
+    # Send to Express
+    save_prediction_to_express(name, eye, predicted_class, confidence)
+
+    # Return all info to React
     return jsonify({
-        "class": prediction["class"],
-        "probabilities": prediction["probabilities"],
+        "class": predicted_class,
+        "confidence": confidence,
+        "probabilities": probabilities,
         "name": name,
         "eye": eye
     })
 
+
+
+import requests
+
+def save_prediction_to_express(patient_name, eye, prediction_label, confidence_score):
+    url = "http://localhost:5001/save-prediction"
+    payload = {
+        "patient_name": patient_name,
+        "eye": eye,
+        "prediction_label": int(prediction_label),
+        "confidence_score": float(confidence_score)
+    }
+
+    try:
+        response = requests.post(url, json=payload)
+        print("✅ Sent to Express:", response.json())
+    except Exception as e:
+        print("❌ Failed to send to Express:", str(e))
+
+
 if __name__ == '__main__':
-    app.run(debug=False, port=5001)
+    app.run(debug=False, port=5000)

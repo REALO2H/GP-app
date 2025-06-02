@@ -27,7 +27,7 @@ const ImageUpload = () => {
     
     setLoading(true);
     try {
-      const res = await axios.post("http://localhost:5001/predict", formData, {
+      const res = await axios.post("http://localhost:5000/predict", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setResult(res.data);
